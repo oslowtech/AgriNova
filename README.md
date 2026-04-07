@@ -2,6 +2,54 @@
 
 AI-powered land intelligence platform with a React Native mobile client and FastAPI backend.
 
+## Screenshots
+
+Save all screenshots in `docs/screenshots/` using the filenames below. The README gallery will render automatically on GitHub.
+
+### Mobile App
+
+1. Dashboard (zone distribution + valuation + quick action)
+
+![Dashboard - Zone Distribution and Valuation](docs/screenshots/01-dashboard-zone-valuation.png)
+
+2. Console log snapshot (role and permissions flow)
+
+![Console Logs - Role and Permission Flow](docs/screenshots/02-console-logs-role-permissions.png)
+
+3. Dashboard (health score + key metrics)
+
+![Dashboard - Health Score and Key Metrics](docs/screenshots/03-dashboard-health-metrics.png)
+
+4. Settings (language selection modal)
+
+![Settings - Language Selector](docs/screenshots/04-settings-language-modal.png)
+
+5. Map screen (prediction panel + measurement card)
+
+![Map - Prediction Panel and Measurements](docs/screenshots/05-map-prediction-measurements.png)
+
+6. Map screen variant (measurement card repositioned)
+
+![Map - Measurement Card Variant](docs/screenshots/06-map-measurement-variant.png)
+
+7. Map screen variant (compact measurements)
+
+![Map - Compact Measurements Variant](docs/screenshots/07-map-compact-measurements.png)
+
+8. Map screen clean view (without measurement card)
+
+![Map - Clean View](docs/screenshots/08-map-clean-view.png)
+
+### Desktop / Model View
+
+9. Terrain clustering model + cluster preview
+
+![Desktop - Terrain Clustering and Cluster Map Preview](docs/screenshots/09-desktop-clustering-preview.png)
+
+10. Land health and valuation panel (dark UI)
+
+![Desktop - Land Health and Valuation Panel](docs/screenshots/10-desktop-health-valuation-panel.png)
+
 ## Project Structure
 
 - frontend/
