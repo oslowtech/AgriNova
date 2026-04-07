@@ -4,6 +4,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import MapView, { Marker, Polygon, Polyline, Circle, MapPressEvent } from "react-native-maps";
 import * as SecureStore from "expo-secure-store";
 import { fetchBoundary, fetchZoneMap, fetchLandHealth, fetchValuation } from "../api/client";
+import { useLanguage } from "../services/LanguageContext";
+import { useUser } from "../services/UserContext";
+import { shouldShowDrawingTools, shouldShowCreateParcelButton, canAccessFeature } from "../services/permissions";
 import { palette, radius, shadows, spacing, typography } from "../theme";
 import { ZoneMap, LandHealth, Valuation } from "../types";
 
@@ -69,9 +72,17 @@ function calculateCenter(points: LatLng[]): LatLng {
 
 export function MapScreen() {
   const insets = useSafeAreaInsets();
+  const { t } = useLanguage();
+  const { user, permissions } = useUser();
   const mapRef = useRef<MapView>(null);
   const [boundary, setBoundary] = useState<LatLng[]>([]);
   const [userBoundary, setUserBoundary] = useState<LatLng[]>([]);
+  
+  // Debug permissions
+  useEffect(() => {
+    console.log('MapScreen - User:', user?.role);
+    console.log('MapScreen - Permissions:', permissions);
+  }, [user, permissions]);
   const [zoneMap, setZoneMap] = useState<ZoneMap | null>(null);
   const [landHealth, setLandHealth] = useState<LandHealth | null>(null);
   const [valuation, setValuation] = useState<Valuation | null>(null);
@@ -134,6 +145,19 @@ export function MapScreen() {
   }, [userBoundary]);
 
   const activeBoundary = userBoundary.length > 0 ? userBoundary : boundary;
+  
+  // Debug boundary state
+  useEffect(() => {
+    console.log('=== BOUNDARY DEBUG ===');
+    console.log('userBoundary length:', userBoundary.length);
+    console.log('boundary length:', boundary.length); 
+    console.log('activeBoundary length:', activeBoundary.length);
+    console.log('showBoundary:', showBoundary);
+    console.log('isDrawing:', isDrawing);
+    if (userBoundary.length > 0) {
+      console.log('userBoundary:', userBoundary);
+    }
+  }, [userBoundary, boundary, showBoundary, isDrawing]);
 
   const zonePolygons = useMemo(() => {
     if (!zoneMap || activeBoundary.length === 0) return [];
@@ -174,6 +198,11 @@ export function MapScreen() {
   };
 
   const startDrawing = () => {
+    if (!permissions.drawBoundaries) {
+      Alert.alert("Permission Denied", "You don't have permission to draw boundaries.");
+      return;
+    }
+    
     setIsDrawing(true);
     setDrawingPoints([]);
     Alert.alert(
@@ -197,15 +226,24 @@ export function MapScreen() {
     // Close the polygon
     const closedBoundary = [...drawingPoints, drawingPoints[0]];
     
+    console.log('=== SAVING BOUNDARY ===');
+    console.log('drawingPoints:', drawingPoints);
+    console.log('closedBoundary:', closedBoundary);
+    
     try {
       await SecureStore.setItemAsync(BOUNDARY_STORAGE_KEY, JSON.stringify(closedBoundary));
+      console.log('Boundary saved to SecureStore');
+      
       setUserBoundary(closedBoundary);
+      console.log('UserBoundary state updated');
+      
       setIsDrawing(false);
       setDrawingPoints([]);
       setLoading(true); // Trigger reload with new boundary
       
       Alert.alert("Success", "Boundary saved! Loading predictions for your land...");
     } catch (e) {
+      console.error('Failed to save boundary:', e);
       Alert.alert("Error", "Could not save boundary. Please try again.");
     }
   };
@@ -373,7 +411,17 @@ export function MapScreen() {
         ))}
 
         {/* User boundary or default boundary */}
-        {showBoundary && !isDrawing && activeBoundary.length > 2 && (
+        {(() => {
+          const shouldRender = showBoundary && !isDrawing && activeBoundary.length > 2;
+          console.log('Boundary render check:', {
+            showBoundary,
+            isDrawing,
+            activeBoundaryLength: activeBoundary.length,
+            shouldRender,
+            userBoundaryLength: userBoundary.length
+          });
+          return shouldRender;
+        })() && (
           <Polygon
             coordinates={activeBoundary}
             fillColor={userBoundary.length > 0 ? palette.primary + "22" : palette.accent + "22"}
@@ -621,68 +669,77 @@ export function MapScreen() {
       )}
 
       {/* Bottom controls */}
-      <View style={[styles.controls, { bottom: 100 + insets.bottom }]}>
+      <View style={[styles.controls, { bottom: 80 + insets.bottom }]}>
         {!isDrawing && !measurementMode ? (
           <>
             <Pressable 
               style={[styles.controlBtn, showPrediction && styles.controlBtnActive]} 
-              onPress={() => setShowPrediction((v) => !v)}
+              onPress={() => {
+                console.log('Predict button pressed by user:', user?.role);
+                setShowPrediction((v) => !v);
+              }}
             >
               <Text style={styles.controlIcon}>🎯</Text>
               <Text style={[styles.controlText, showPrediction && styles.controlTextActive]}>
-                Predict
+                {t("predict")}
               </Text>
             </Pressable>
-            <Pressable 
-              style={styles.controlBtn} 
-              onPress={startDrawing}
-            >
-              <Text style={styles.controlIcon}>✏️</Text>
-              <Text style={styles.controlText}>Draw</Text>
-            </Pressable>
+            {permissions.drawBoundaries && (
+              <Pressable 
+                style={styles.controlBtn} 
+                onPress={() => {
+                  console.log('Draw button pressed by user:', user?.role, 'permissions:', permissions.drawBoundaries);
+                  startDrawing();
+                }}
+              >
+                <Text style={styles.controlIcon}>✏️</Text>
+                <Text style={styles.controlText}>{t("draw")}</Text>
+              </Pressable>
+            )}
             <Pressable 
               style={styles.controlBtn} 
               onPress={() => startMeasurement('point')}
             >
               <Text style={styles.controlIcon}>📍</Text>
-              <Text style={styles.controlText}>Point</Text>
+              <Text style={styles.controlText}>{t("point")}</Text>
             </Pressable>
             <Pressable 
               style={styles.controlBtn} 
               onPress={() => startMeasurement('line')}
             >
               <Text style={styles.controlIcon}>📏</Text>
-              <Text style={styles.controlText}>Distance</Text>
+              <Text style={styles.controlText}>{t("line")}</Text>
             </Pressable>
             <Pressable 
               style={styles.controlBtn} 
               onPress={() => startMeasurement('area')}
             >
               <Text style={styles.controlIcon}>🗺️</Text>
-              <Text style={styles.controlText}>Area</Text>
+              <Text style={styles.controlText}>{t("area")}</Text>
             </Pressable>
-            {userBoundary.length > 0 && (
+            {userBoundary.length > 0 && permissions.drawBoundaries && (
               <Pressable 
                 style={styles.controlBtn} 
                 onPress={clearBoundary}
               >
                 <Text style={styles.controlIcon}>🗑️</Text>
-                <Text style={styles.controlText}>Clear</Text>
+                <Text style={styles.controlText}>{t("clear")}</Text>
               </Pressable>
             )}
+            {console.log('MapScreen rendering controls for user:', user?.role, 'drawBoundaries:', permissions.drawBoundaries)}
           </>
         ) : measurementMode ? (
           <View style={styles.drawingHint}>
             <Text style={styles.drawingHintText}>
-              {measurementMode === 'point' ? '📍 Tap to get coordinates' : 
-               measurementMode === 'line' ? '📏 Tap two points to measure distance' :
-               '🗺️ Tap points to create area (min 3)'}
+              {measurementMode === 'point' ? t("tapToGetCoordinates") : 
+               measurementMode === 'line' ? t("tapTwoPointsDistance") :
+               t("tapPointsCreateArea")}
             </Text>
           </View>
         ) : (
           <View style={styles.drawingHint}>
             <Text style={styles.drawingHintText}>
-              👆 Tap on the map to add boundary points
+              {t("tapMapAddBoundary")}
             </Text>
           </View>
         )}
@@ -771,28 +828,39 @@ const styles = StyleSheet.create({
     left: spacing.md,
     right: spacing.md,
     flexDirection: "row",
-    gap: spacing.sm
+    gap: spacing.sm,
+    flexWrap: "wrap",
   },
   controlBtn: {
     flex: 1,
-    flexDirection: "row",
+    minWidth: 70,
+    maxWidth: 95,
+    flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    gap: spacing.xs,
+    gap: 6,
     paddingVertical: 14,
+    paddingHorizontal: 10,
     borderRadius: radius.lg,
-    backgroundColor: palette.cardBg,
-    ...shadows.md
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    borderWidth: 1.5,
+    borderColor: palette.border,
+    ...shadows.lg,
+    elevation: 8,
   },
   controlBtnActive: {
     backgroundColor: palette.primary,
+    borderColor: palette.primary,
   },
   controlIcon: {
-    fontSize: 18
+    fontSize: 24
   },
   controlText: {
-    ...typography.bodyBold,
-    color: palette.ink
+    ...typography.caption,
+    color: palette.ink,
+    textAlign: "center",
+    fontWeight: "700",
+    fontSize: 11
   },
   controlTextActive: {
     color: palette.surface

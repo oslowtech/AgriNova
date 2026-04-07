@@ -13,6 +13,7 @@ import * as SecureStore from "expo-secure-store";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import { getFirebaseAuth, getFirebaseDb } from "../config/firebase";
+import { saveUser, getUser } from "./database_temp";
 import { UserProfile, UserRole } from "../types";
 import { setAuthToken } from "../api/client";
 
@@ -86,6 +87,29 @@ export async function initializeAuth(): Promise<void> {
   }
 }
 
+export async function restoreAuthSession(): Promise<UserProfile | null> {
+  try {
+    const token = await SecureStore.getItemAsync(TOKEN_KEY);
+    const userJson = await SecureStore.getItemAsync(USER_KEY);
+    
+    if (token && userJson) {
+      const user = JSON.parse(userJson) as UserProfile;
+      setAuthToken(token);
+      currentUser = user;
+      
+      // Also save to local database for consistency
+      await saveUser(user);
+      
+      notifyListeners();
+      return user;
+    }
+  } catch (error) {
+    console.error('Failed to restore auth session:', error);
+  }
+  
+  return null;
+}
+
 export async function saveAuthSession(token: string, user: UserProfile): Promise<void> {
   await SecureStore.setItemAsync(TOKEN_KEY, token);
   await SecureStore.setItemAsync(USER_KEY, JSON.stringify(user));
@@ -131,6 +155,16 @@ export async function verifyOTP(verificationCode: string): Promise<{ user: UserP
   const mockToken = `demo_token_${Date.now()}`;
   const uid = `user_${pendingPhone.replace(/\D/g, "")}`;
   
+  // First check if user exists in local storage
+  let existingUser = await getUser(uid);
+  
+  if (existingUser) {
+    console.log('Existing user found:', existingUser);
+    await saveAuthSession(mockToken, existingUser);
+    await SecureStore.deleteItemAsync("pending_phone");
+    return { user: existingUser, token: mockToken, isNewUser: false };
+  }
+  
   let userDoc = null;
   const db = getFirebaseDb();
   if (db) {
@@ -152,6 +186,8 @@ export async function verifyOTP(verificationCode: string): Promise<{ user: UserP
   };
 
   if (!isNewUser) {
+    // Save existing user to local storage
+    await saveUser(user);
     await saveAuthSession(mockToken, user);
   }
 
@@ -249,6 +285,10 @@ export async function completeOnboarding(
   }
 
   await saveAuthSession(pendingToken, user);
+  
+  // Save to local database
+  saveUser(user);
+  
   return user;
 }
 

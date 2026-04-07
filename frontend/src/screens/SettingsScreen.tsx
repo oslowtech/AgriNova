@@ -9,6 +9,7 @@ import {
   View 
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useLanguage, Language } from "../services/LanguageContext";
 import { palette, radius, shadows, spacing, typography } from "../theme";
 
 type Props = {
@@ -17,6 +18,7 @@ type Props = {
 
 export function SettingsScreen({ onBack }: Props) {
   const insets = useSafeAreaInsets();
+  const { t, language, setLanguage } = useLanguage();
   
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
@@ -25,12 +27,24 @@ export function SettingsScreen({ onBack }: Props) {
   const [autoSync, setAutoSync] = useState(true);
   const [biometricLock, setBiometricLock] = useState(false);
 
+  const handleLanguageSelect = () => {
+    Alert.alert(
+      t("selectLanguage"),
+      "",
+      [
+        { text: t("cancel"), style: "cancel" },
+        { text: t("english"), onPress: () => setLanguage("en" as Language) },
+        { text: t("tamil"), onPress: () => setLanguage("ta" as Language) }
+      ]
+    );
+  };
+
   const handleClearCache = () => {
     Alert.alert(
-      "Clear Cache",
-      "This will clear all cached data. Are you sure?",
+      t("clearCache"),
+      t("clearCacheConfirm"),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("cancel"), style: "cancel" },
         { 
           text: "Clear", 
           style: "destructive",
@@ -45,7 +59,7 @@ export function SettingsScreen({ onBack }: Props) {
       "Export Data",
       "Your data will be exported as a JSON file.",
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("cancel"), style: "cancel" },
         { 
           text: "Export", 
           onPress: () => Alert.alert("Success", "Data exported successfully!")
@@ -59,9 +73,9 @@ export function SettingsScreen({ onBack }: Props) {
       "Delete Account",
       "This action cannot be undone. All your data will be permanently deleted.",
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("cancel"), style: "cancel" },
         { 
-          text: "Delete", 
+          text: t("delete"), 
           style: "destructive",
           onPress: () => Alert.alert("Demo Mode", "Account deletion is disabled in demo mode.")
         }
@@ -75,7 +89,7 @@ export function SettingsScreen({ onBack }: Props) {
         <Pressable onPress={onBack} style={styles.backBtn}>
           <Text style={styles.backIcon}>←</Text>
         </Pressable>
-        <Text style={styles.title}>Settings</Text>
+        <Text style={styles.title}>{t("settings")}</Text>
         <View style={styles.placeholder} />
       </View>
 
@@ -84,6 +98,23 @@ export function SettingsScreen({ onBack }: Props) {
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
+        {/* Language */}
+        <Text style={styles.sectionTitle}>{t("appSettings")}</Text>
+        <View style={styles.card}>
+          <Pressable style={styles.actionRow} onPress={handleLanguageSelect}>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingIcon}>🌐</Text>
+              <View>
+                <Text style={styles.settingLabel}>{t("language")}</Text>
+                <Text style={styles.settingDesc}>
+                  {language === "en" ? t("english") : t("tamil")}
+                </Text>
+              </View>
+            </View>
+            <Text style={styles.arrow}>›</Text>
+          </Pressable>
+        </View>
+
         {/* Appearance */}
         <Text style={styles.sectionTitle}>Appearance</Text>
         <View style={styles.card}>
@@ -105,13 +136,13 @@ export function SettingsScreen({ onBack }: Props) {
         </View>
 
         {/* Notifications */}
-        <Text style={styles.sectionTitle}>Notifications</Text>
+        <Text style={styles.sectionTitle}>{t("notifications_settings")}</Text>
         <View style={styles.card}>
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
               <Text style={styles.settingIcon}>🔔</Text>
               <View>
-                <Text style={styles.settingLabel}>Push Notifications</Text>
+                <Text style={styles.settingLabel}>{t("enableNotifications")}</Text>
                 <Text style={styles.settingDesc}>Receive alerts & updates</Text>
               </View>
             </View>

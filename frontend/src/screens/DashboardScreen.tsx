@@ -10,6 +10,9 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { fetchLandHealth, fetchValuation, fetchZoneMap } from "../api/client";
+import { useUser } from "../services/UserContext";
+import { useLanguage } from "../services/LanguageContext";
+import { getParcelsForUser, getParcelHealth, getParcelValuation } from "../services/database_temp";
 import { HealthGauge } from "../components/HealthGauge";
 import { MetricCard } from "../components/MetricCard";
 import { ZoneLegend } from "../components/ZoneLegend";
@@ -21,9 +24,12 @@ const DEMO_LNG = 77.5946;
 
 export function DashboardScreen() {
   const insets = useSafeAreaInsets();
+  const { user, permissions } = useUser();
+  const { t } = useLanguage();
   const [health, setHealth] = useState<LandHealth | null>(null);
   const [zone, setZone] = useState<ZoneMap | null>(null);
   const [valuation, setValuation] = useState<Valuation | null>(null);
+  const [parcels, setParcels] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -31,6 +37,14 @@ export function DashboardScreen() {
   async function load() {
     try {
       setError(null);
+      
+      // Load user's parcels based on role
+      if (user) {
+        const userParcels = await getParcelsForUser(user.uid, user.role);
+        setParcels(userParcels);
+      }
+      
+      // For demo, still load default data
       const [healthData, zoneData, valuationData] = await Promise.all([
         fetchLandHealth(DEMO_LAT, DEMO_LNG),
         fetchZoneMap(DEMO_LAT, DEMO_LNG),
@@ -75,7 +89,14 @@ export function DashboardScreen() {
       <View style={styles.header}>
         <View>
           <Text style={styles.greeting}>Good morning 👋</Text>
-          <Text style={styles.title}>Land Dashboard</Text>
+          <Text style={styles.title}>
+            {permissions.viewAllParcels ? 'Land Management Dashboard' : 'My Land Dashboard'}
+          </Text>
+          {user && (
+            <Text style={styles.roleText}>
+              {user.role === 'land_consultant' ? 'Land Consultant' : 'Landowner'} • {parcels.length} parcel{parcels.length !== 1 ? 's' : ''}
+            </Text>
+          )}
         </View>
         <Pressable style={styles.refreshBtn} onPress={() => { setRefreshing(true); void load(); }}>
           <Text style={styles.refreshIcon}>🔄</Text>
@@ -163,6 +184,33 @@ export function DashboardScreen() {
           </View>
         )}
 
+        {/* Quick Actions based on role */}
+        <Text style={styles.sectionTitle}>Quick Actions</Text>
+        <View style={styles.quickActions}>
+          {permissions.createParcels && (
+            <Pressable style={styles.actionButton}>
+              <Text style={styles.actionIcon}>➕</Text>
+              <Text style={styles.actionText}>Create Parcel</Text>
+            </Pressable>
+          )}
+          {permissions.uploadDocuments && (
+            <Pressable style={styles.actionButton}>
+              <Text style={styles.actionIcon}>📄</Text>
+              <Text style={styles.actionText}>Upload Documents</Text>
+            </Pressable>
+          )}
+          {permissions.manageUsers && (
+            <Pressable style={styles.actionButton}>
+              <Text style={styles.actionIcon}>👥</Text>
+              <Text style={styles.actionText}>Invite Landowner</Text>
+            </Pressable>
+          )}
+          <Pressable style={styles.actionButton}>
+            <Text style={styles.actionIcon}>📊</Text>
+            <Text style={styles.actionText}>View Reports</Text>
+          </Pressable>
+        </View>
+
         <View style={{ height: 100 }} />
       </ScrollView>
     </View>
@@ -189,6 +237,11 @@ const styles = StyleSheet.create({
   title: {
     ...typography.h2,
     color: palette.ink
+  },
+  roleText: {
+    ...typography.caption,
+    color: palette.muted,
+    marginTop: 2
   },
   refreshBtn: {
     width: 44,
@@ -305,5 +358,30 @@ const styles = StyleSheet.create({
     color: palette.subtle,
     textAlign: "center",
     marginTop: spacing.md
+  },
+  quickActions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    marginBottom: spacing.lg
+  },
+  actionButton: {
+    flex: 1,
+    minWidth: '48%',
+    backgroundColor: palette.surface,
+    padding: spacing.md,
+    borderRadius: radius.lg,
+    alignItems: "center",
+    gap: spacing.xs,
+    ...shadows.sm
+  },
+  actionIcon: {
+    fontSize: 24
+  },
+  actionText: {
+    ...typography.caption,
+    color: palette.ink,
+    fontWeight: "600",
+    textAlign: "center"
   }
 });

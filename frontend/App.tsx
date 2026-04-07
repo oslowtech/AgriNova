@@ -5,7 +5,9 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AppNavigator } from "./src/navigation/AppNavigator";
 import { AuthScreen } from "./src/screens/AuthScreen";
 import { OnboardingScreen } from "./src/screens/OnboardingScreen";
-import { initializeAuth, onAuthStateChanged } from "./src/services/auth";
+import { initializeAuth, onAuthStateChanged, restoreAuthSession } from "./src/services/auth";
+import { LanguageProvider } from "./src/services/LanguageContext";
+import { UserProvider } from "./src/services/UserContext";
 import { UserProfile } from "./src/types";
 import { palette } from "./src/theme";
 
@@ -21,6 +23,14 @@ export default function App() {
     async function init() {
       try {
         await initializeAuth();
+        
+        // Try to restore existing auth session
+        const restoredUser = await restoreAuthSession();
+        if (restoredUser) {
+          console.log('Restored user session:', restoredUser);
+          setAuthState("authenticated");
+          return;
+        }
         
         onAuthStateChanged((user) => {
           if (user && user.name) {
@@ -83,23 +93,27 @@ export default function App() {
   }
 
   return (
-    <SafeAreaProvider>
-      <StatusBar style="dark" />
-      {authState === "authenticated" ? (
-        <AppNavigator />
-      ) : authState === "onboarding" && pendingUser && pendingToken ? (
-        <OnboardingScreen 
-          pendingUser={pendingUser}
-          pendingToken={pendingToken}
-          onComplete={handleOnboardingComplete}
-        />
-      ) : (
-        <AuthScreen 
-          onAuthenticated={handleAuthenticated}
-          onNeedsOnboarding={handleNeedsOnboarding}
-        />
-      )}
-    </SafeAreaProvider>
+    <LanguageProvider>
+      <UserProvider>
+        <SafeAreaProvider>
+          <StatusBar style="dark" />
+          {authState === "authenticated" ? (
+            <AppNavigator />
+          ) : authState === "onboarding" && pendingUser && pendingToken ? (
+            <OnboardingScreen 
+              pendingUser={pendingUser}
+              pendingToken={pendingToken}
+              onComplete={handleOnboardingComplete}
+            />
+          ) : (
+            <AuthScreen 
+              onAuthenticated={handleAuthenticated}
+              onNeedsOnboarding={handleNeedsOnboarding}
+            />
+          )}
+        </SafeAreaProvider>
+      </UserProvider>
+    </LanguageProvider>
   );
 }
 

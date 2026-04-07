@@ -12,9 +12,11 @@ import {
   View 
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as SecureStore from "expo-secure-store";
 // import * as Location from "expo-location"; // TODO: Install expo-location: npx expo install expo-location
 import { palette, radius, shadows, spacing, typography } from "../theme";
 import { completeOnboarding } from "../services/auth";
+import { seedDemoData } from "../services/seedData";
 import { UserProfile, UserRole } from "../types";
 
 type OnboardingStep = "welcome" | "name" | "role" | "location" | "complete";
@@ -109,6 +111,13 @@ export function OnboardingScreen({ pendingUser, pendingToken, onComplete }: Prop
         location: location || undefined,
         createdAt: new Date()
       }, pendingToken);
+
+      // Only seed demo data once, not on every onboarding
+      const isFirstTime = await SecureStore.getItemAsync('demo_data_seeded');
+      if (!isFirstTime) {
+        await seedDemoData();
+        await SecureStore.setItemAsync('demo_data_seeded', 'true');
+      }
 
       onComplete();
     } catch (err) {
