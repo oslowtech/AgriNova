@@ -270,7 +270,7 @@ export function SettingsScreen({ onBack }: Props) {
 
         {/* App Info */}
         <View style={styles.appInfo}>
-          <Text style={styles.appName}>AgriNova</Text>
+          <Text style={styles.appName}>GeoInsight</Text>
           <Text style={styles.appVersion}>Version 1.0.0</Text>
         </View>
       </ScrollView>

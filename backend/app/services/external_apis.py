@@ -320,7 +320,7 @@ async def fetch_location_info(lat: float, lng: float) -> Optional[LocationInfo]:
         "zoom": 14
     }
     headers = {
-        "User-Agent": "AgriNova/1.0 (land-intelligence-app)"
+        "User-Agent": "GeoInsight/1.0 (land-intelligence-app)"
     }
     
     try:

@@ -34,7 +34,7 @@ export function ProfileScreen() {
     role: user?.role === "land_consultant" ? "Land Consultant" : "Landowner",
     region: "Kallapuram District",
     phone: user?.phone || "+91 98765 43210",
-    email: user?.email || "demo@agrinova.app",
+    email: user?.email || "demo@geoinsight.app",
     parcelsManaged: 12,
     totalAcres: 245.5,
     avgHealthScore: 76

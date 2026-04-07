@@ -1,7 +1,7 @@
 import * as SQLite from 'expo-sqlite';
 import { UserProfile, UserRole } from '../types';
 
-const db = SQLite.openDatabaseSync('agrinova.db');
+const db = SQLite.openDatabaseSync('geoinsight.db');
 
 // Initialize database tables
 export const initializeDatabase = () => {

@@ -13,11 +13,10 @@ frontend/.env
 backend/.env
 frontend/ google-services.json
 backend/ google-services.json
-frontend/package.json
-frontend/package-lock.json
+
 # OS
 .DS_Store
 Thumbs.db
 ProblemStatementAndData
-frontend/package-lock.json
 frontend/package.json
+frontend/package-lock.json

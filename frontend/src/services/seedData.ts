@@ -8,11 +8,11 @@ export const seedDemoData = async () => {
   // Create demo users
   const consultantUser = {
     uid: 'consultant_demo',
-    email: 'consultant@agrinova.com',
+    email: 'consultant@geoinsight.com',
     phone: '+917307058932',
     role: 'land_consultant' as UserRole,
     name: 'John Smith',
-    location: 'Bangalore, Karnataka'
+    createdAt: new Date()
   };
   
   const landownerUser = {
@@ -21,7 +21,7 @@ export const seedDemoData = async () => {
     phone: '+917307058933',
     role: 'landowner' as UserRole,
     name: 'Rajesh Kumar',
-    location: 'Bangalore, Karnataka'
+    createdAt: new Date()
   };
   
   await saveUser(consultantUser);

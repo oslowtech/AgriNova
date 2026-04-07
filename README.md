@@ -1,4 +1,4 @@
-# Landroid (AgriNova)
+# GeoInsight
 
 AI-powered land intelligence platform for parcel health analysis, NDVI zoning, and indicative valuation.
 

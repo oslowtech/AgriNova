@@ -147,7 +147,7 @@ export function AuthScreen({ onAuthenticated, onNeedsOnboarding }: Props) {
         <View style={styles.logoWrap}>
           <Text style={styles.logoIcon}>🌾</Text>
         </View>
-        <Text style={styles.title}>AgriNova</Text>
+        <Text style={styles.title}>GeoInsight</Text>
         <Text style={styles.subtitle}>AI-Powered Land Intelligence</Text>
       </View>
 

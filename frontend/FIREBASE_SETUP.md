@@ -1,4 +1,4 @@
-# Firebase Setup Guide for AgriNova/Landroid
+# Firebase Setup Guide for GeoInsight/GeoInsight
 
 ## 📋 Prerequisites
 - Google Account
@@ -11,7 +11,7 @@
 
 1. Go to [Firebase Console](https://console.firebase.google.com)
 2. Click **"Create a project"**
-3. Name it `agrinova` or `landroid`
+3. Name it `geoinsight` or `geoinsight`
 4. Enable Google Analytics (optional)
 5. Wait for project creation
 
@@ -20,8 +20,8 @@
 ## 📱 Step 2: Add Android App
 
 1. In Firebase Console → **Project Overview** → **Add app** → Android icon
-2. Enter package name: `com.agrinova.landroid`
-3. Enter app nickname: `Landroid`
+2. Enter package name: `com.geoinsight.geoinsight`
+3. Enter app nickname: `GeoInsight`
 4. Click **Register app**
 5. Download `google-services.json`
 6. Place it in: `frontend/google-services.json`
@@ -89,7 +89,7 @@ service cloud.firestore {
 ### Create Android OAuth Client (if not exists)
 1. Click **+ CREATE CREDENTIALS** → **OAuth client ID**
 2. Choose **Android**
-3. Package name: `com.agrinova.landroid`
+3. Package name: `com.geoinsight.geoinsight`
 4. SHA-1: Get from `eas credentials` or:
    ```bash
    cd frontend
@@ -107,9 +107,9 @@ EXPO_PUBLIC_API_BASE_URL=http://YOUR_BACKEND_IP:8000
 
 # From Firebase Console → Project Settings → General → Your apps
 EXPO_PUBLIC_FIREBASE_API_KEY=AIzaSy...
-EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=agrinova-xxxxx.firebaseapp.com
-EXPO_PUBLIC_FIREBASE_PROJECT_ID=agrinova-xxxxx
-EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=agrinova-xxxxx.appspot.com
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=geoinsight-xxxxx.firebaseapp.com
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=geoinsight-xxxxx
+EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=geoinsight-xxxxx.appspot.com
 EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789
 EXPO_PUBLIC_FIREBASE_APP_ID=1:123456789:android:abcdef
 

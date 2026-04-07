@@ -277,7 +277,7 @@ def predict_health(features: dict, model: RandomForestRegressor = None) -> float
 
 def main():
     """Main training pipeline."""
-    # Find TIF file - path: backend/ml -> backend -> AgriNova -> ProblemStatementAndData
+    # Find TIF file - path: backend/ml -> backend -> GeoInsight -> ProblemStatementAndData
     data_dir = Path(__file__).resolve().parent.parent.parent / "ProblemStatementAndData"
     
     print(f"Looking for TIF files in: {data_dir}")

@@ -17,13 +17,13 @@ if (Platform.OS !== "web") {
 }
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB_MeF0APuRDzPNrSlJCDSOBjbKikK_-24",
-  authDomain: "landhealth-21750.firebaseapp.com",
-  projectId: "landhealth-21750",
-  storageBucket: "landhealth-21750.firebasestorage.app",
-  messagingSenderId: "641692789228",
-  appId: "1:641692789228:web:b0ab1c0152d61e3e0ef8c9",
-  measurementId: "G-6EP55T5CV0"
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || "",
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || "",
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID || "",
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || "",
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "",
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || "",
+  measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID || undefined
 };
 
 let firebaseApp: FirebaseApp | null = null;
@@ -35,11 +35,17 @@ function initFirebase(): FirebaseApp | null {
   if (initError) return null;
   
   try {
+    if (!firebaseConfig.apiKey || !firebaseConfig.projectId || !firebaseConfig.appId) {
+      throw new Error(
+        "Firebase config is missing. Set EXPO_PUBLIC_FIREBASE_API_KEY, EXPO_PUBLIC_FIREBASE_PROJECT_ID, and EXPO_PUBLIC_FIREBASE_APP_ID in frontend/.env"
+      );
+    }
+
     const apps = getApps();
     if (apps.length === 0) {
       return initializeApp(firebaseConfig);
     }
-    return apps[0];
+    return apps[0] ?? null;
   } catch (error) {
     console.warn("Firebase init failed:", error);
     initError = error as Error;

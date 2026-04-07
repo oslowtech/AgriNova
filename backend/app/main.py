@@ -45,7 +45,7 @@ except ImportError:
     ML_AVAILABLE = False
 
 app = FastAPI(
-    title="Landroid API", 
+    title="GeoInsight API", 
     version="2.0.0",
     description="AI-powered land intelligence platform with real external data APIs"
 )
@@ -68,7 +68,7 @@ def _boundary_file() -> Path:
 
 @app.get("/health")
 async def health() -> dict:
-    return {"status": "ok", "service": "Landroid API", "version": "2.0.0"}
+    return {"status": "ok", "service": "GeoInsight API", "version": "2.0.0"}
 
 
 @app.get("/boundary")

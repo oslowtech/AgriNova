@@ -130,7 +130,7 @@ export function OnboardingScreen({ pendingUser, pendingToken, onComplete }: Prop
 
   const renderWelcome = () => (
     <View style={styles.stepContainer}>
-      <Text style={styles.welcomeTitle}>🌱 Welcome to AgriNova</Text>
+      <Text style={styles.welcomeTitle}>🌱 Welcome to GeoInsight</Text>
       <Text style={styles.subtitle}>
         AI-powered land intelligence platform for smarter agriculture decisions
       </Text>
@@ -316,7 +316,7 @@ export function OnboardingScreen({ pendingUser, pendingToken, onComplete }: Prop
           {loading ? (
             <ActivityIndicator size="small" color={palette.surface} />
           ) : (
-            <Text style={styles.primaryButtonText}>Enter AgriNova</Text>
+            <Text style={styles.primaryButtonText}>Enter GeoInsight</Text>
           )}
         </Pressable>
       </View>

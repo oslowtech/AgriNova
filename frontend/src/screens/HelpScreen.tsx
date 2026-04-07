@@ -52,7 +52,7 @@ const FAQS: FAQ[] = [
   {
     id: "6",
     question: "Why am I not receiving notifications?",
-    answer: "Check that notifications are enabled in Settings → Notifications. Also verify your phone's notification settings for AgriNova app. Make sure Do Not Disturb is not enabled.",
+    answer: "Check that notifications are enabled in Settings → Notifications. Also verify your phone's notification settings for GeoInsight app. Make sure Do Not Disturb is not enabled.",
     category: "notifications"
   },
   {
@@ -100,7 +100,7 @@ export function HelpScreen({ onBack }: Props) {
   };
 
   const handleEmailSupport = () => {
-    Linking.openURL("mailto:support@agrinova.app?subject=Help Request");
+    Linking.openURL("mailto:support@geoinsight.app?subject=Help Request");
   };
 
   const handleCallSupport = () => {
@@ -189,7 +189,7 @@ export function HelpScreen({ onBack }: Props) {
               </Text>
               <Pressable 
                 style={styles.linkBtn}
-                onPress={() => Linking.openURL("https://agrinova.app/docs")}
+                onPress={() => Linking.openURL("https://geoinsight.app/docs")}
               >
                 <Text style={styles.linkText}>Visit Documentation →</Text>
               </Pressable>
@@ -202,7 +202,7 @@ export function HelpScreen({ onBack }: Props) {
               </Text>
               <Pressable 
                 style={styles.linkBtn}
-                onPress={() => Linking.openURL("https://community.agrinova.app")}
+                onPress={() => Linking.openURL("https://community.geoinsight.app")}
               >
                 <Text style={styles.linkText}>Join Community →</Text>
               </Pressable>

@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Landroid",
-    "slug": "landroid",
-    "scheme": "landroid",
+    "name": "GeoInsight",
+    "slug": "geoinsight",
+    "scheme": "geoinsight",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
@@ -12,10 +12,10 @@
     "plugins": [],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.agrinova.landroid"
+      "bundleIdentifier": "com.geoinsight.geoinsight"
     },
     "android": {
-      "package": "com.agrinova.landroid",
+      "package": "com.geoinsight.geoinsight",
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
