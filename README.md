@@ -1,147 +1,175 @@
-# Landroid
+# Landroid (AgriNova)
 
-AI-powered land intelligence platform with a React Native mobile client and FastAPI backend.
+AI-powered land intelligence platform for parcel health analysis, NDVI zoning, and indicative valuation.
 
-## Screenshots
+This repository contains:
+- a FastAPI backend (core intelligence + external data connectors)
+- an integrated ML prediction module
+- a React Native (Expo) mobile app that consumes these APIs
 
-All uploaded app screenshots are embedded below.
+## What Is Connected End-to-End
 
-1. Screenshot 01
+1. Frontend calls backend APIs from `frontend/src/api/client.ts`.
+2. Backend serves land intelligence APIs from `backend/app/main.py`.
+3. Backend includes ML router from `backend/ml/api.py` at `/ml/*`.
+4. ML training/inference logic is in `backend/ml/train.py`.
+5. Core health scoring uses ML when model is available, with fallback weighted scoring if model is not present.
+6. Frontend has safe demo fallbacks so UI remains functional even if network/API is unavailable.
 
-![Screenshot 01](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.06.jpeg)
+## Architecture
 
-2. Screenshot 02
-
-![Screenshot 02](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.08.jpeg)
-
-3. Screenshot 03
-
-![Screenshot 03](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.10.jpeg)
-
-4. Screenshot 04
-
-![Screenshot 04](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.11%20(1).jpeg)
-
-5. Screenshot 05
-
-![Screenshot 05](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.11.jpeg)
-
-6. Screenshot 06
-
-![Screenshot 06](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.13.jpeg)
-
-7. Screenshot 07
-
-![Screenshot 07](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.14.jpeg)
-
-8. Screenshot 08
-
-![Screenshot 08](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.22%20(1).jpeg)
-
-9. Screenshot 09
-
-![Screenshot 09](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.22.jpeg)
-
-10. Screenshot 10
-
-![Screenshot 10](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.24.47.jpeg)
-
-11. Screenshot 11
-
-![Screenshot 11](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.24.49.jpeg)
-
-12. Screenshot 12
-
-![Screenshot 12](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.25.04.jpeg)
-
-13. Screenshot 13
-
-![Screenshot 13](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.25.26.jpeg)
-
-14. Screenshot 14
-
-![Screenshot 14](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.25.38.jpeg)
-
-15. Screenshot 15
-
-![Screenshot 15](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.25.48.jpeg)
-
-16. Screenshot 16
-
-![Screenshot 16](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.26.06.jpeg)
+```text
+Mobile App (Expo React Native)
+        |
+        | HTTP (REST)
+        v
+FastAPI Backend (app/main.py)
+  |- Core intelligence: /land-health, /zone-map, /valuation
+  |- External APIs: /soil, /weather, /proximity, /location
+  |- Aggregator: /intelligence
+  |- Health/infra: /health, /boundary
+  '- ML router: /ml/predict, /ml/model/info
+            |
+            v
+   RandomForest model + raster feature pipeline (backend/ml)
+```
 
 ## Project Structure
 
-- frontend/
-- backend/
-- ProblemStatementAndData/
+```text
+backend/
+  app/
+    main.py
+    schemas.py
+    data_store.py
+    services/
+      external_apis.py
+      land_intelligence.py
+  ml/
+    api.py
+    train.py
+    app.py
+frontend/
+  src/
+    api/client.ts
+ProblemStatementAndData/
+README.md
+```
 
-## Backend (FastAPI)
-
-1. Open terminal in backend folder.
-2. Create and activate virtual environment.
-3. Install dependencies.
-4. Run API server.
+## Backend Setup (FastAPI)
 
 ```bash
 cd backend
 python -m venv .venv
-.venv\\Scripts\\activate
+.venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-Backend endpoints:
-- GET /land-health?lat=&lng=
-- GET /zone-map?lat=&lng=&grid_size=
-- GET /valuation?lat=&lng=
-- GET /boundary
-- GET /health
+Base URL: `http://localhost:8000`
 
-## Frontend (React Native with Expo)
-
-1. Open second terminal in frontend folder.
-2. Install dependencies.
-3. Configure API base URL.
-4. Start Expo app.
+## Frontend Setup (Expo)
 
 ```bash
 cd frontend
 npm install
 ```
 
-Create .env file from .env.example:
+Create `.env`:
 
 ```bash
 EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:8000
 ```
 
-Use these values depending on device:
-- Android emulator: http://10.0.2.2:8000
-- iOS simulator: http://127.0.0.1:8000
-- Physical device: http://<your-lan-ip>:8000
+Use API base URL by target:
+- Android emulator: `http://10.0.2.2:8000`
+- iOS simulator: `http://127.0.0.1:8000`
+- Physical device: `http://<your-lan-ip>:8000`
 
-Run app:
+Run:
 
 ```bash
 npm run start
 ```
 
-## Features Implemented
+## ML Prediction Model (Working Integration)
 
-- OTP-style authentication screen (Firebase-ready structure)
-- Dashboard with health score, label, confidence, and metric cards
-- Zone distribution visualization with percentage bars
-- Satellite map with boundary overlay and NDVI zone layer toggle
-- Bottom tab navigation: Map, Dashboard, Profile
-- Weighted scoring model:
-  - health = 0.4*ndvi + 0.3*rainfall + 0.2*soil + 0.1*temperature
-- NDVI normalization and zone classification algorithm
-- Confidence score based on completeness and metric consistency
-- Valuation range estimation endpoint
-- API response caching for performance
+### Train model
 
-## Notes
+```bash
+cd backend
+.venv\Scripts\activate
+python -m ml.train
+```
 
-- Existing boundary data is in projected coordinates; app normalizes it for map rendering when needed.
-- System is simulation-ready for hackathons and can be swapped with real environmental APIs.
+This creates `backend/ml/land_health_model.pkl`.
+
+### How prediction works
+
+- `GET /ml/predict` and `POST /ml/predict` provide model inference.
+- `GET /ml/model/info` reports model readiness and feature importances.
+- The main health pipeline in `app/services/land_intelligence.py` uses trained ML model when available.
+- If model is missing or cannot load, backend automatically falls back to deterministic weighted formula, so predictions still continue.
+
+## API Reference (Connected and Implemented)
+
+All routes below are implemented in `backend/app/main.py` and `backend/ml/api.py`.
+
+| Endpoint | Method | Purpose |
+|---|---|---|
+| `/health` | GET | API health check |
+| `/boundary` | GET | Returns parcel boundary GeoJSON |
+| `/land-health` | GET | Health score, label, confidence, metrics |
+| `/zone-map` | GET | Cell-wise NDVI zones + percentages |
+| `/valuation` | GET | Indicative valuation range + top factors |
+| `/soil` | GET | SoilGrids-based soil properties |
+| `/weather` | GET | Open-Meteo weather summary |
+| `/proximity` | GET | OSM proximity to highway/town/water |
+| `/location` | GET | Reverse geocoded location info |
+| `/intelligence` | GET | Combined one-call intelligence payload |
+| `/ml/predict` | GET/POST | ML health prediction |
+| `/ml/model/info` | GET | Model metadata/readiness |
+
+## Quick API Verification
+
+Run after backend is started:
+
+```bash
+curl "http://localhost:8000/health"
+curl "http://localhost:8000/land-health?lat=12.961705&lng=77.599227"
+curl "http://localhost:8000/zone-map?lat=12.961705&lng=77.599227&grid_size=12"
+curl "http://localhost:8000/valuation?lat=12.961705&lng=77.599227"
+curl "http://localhost:8000/intelligence?lat=12.961705&lng=77.599227"
+curl "http://localhost:8000/ml/model/info"
+curl "http://localhost:8000/ml/predict?ndvi=0.62&rainfall=900&soil_ph=6.5&temperature=27"
+```
+
+If these return JSON responses, API connectivity and prediction flow are working correctly.
+
+## Screenshots
+
+### Mobile App and Console
+
+![Screenshot 01](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.06.jpeg)
+![Screenshot 02](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.08.jpeg)
+![Screenshot 03](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.10.jpeg)
+![Screenshot 04](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.11%20%281%29.jpeg)
+![Screenshot 05](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.11.jpeg)
+![Screenshot 06](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.13.jpeg)
+![Screenshot 07](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.14.jpeg)
+![Screenshot 08](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.22%20%281%29.jpeg)
+![Screenshot 09](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.22.jpeg)
+![Screenshot 10](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.24.47.jpeg)
+![Screenshot 11](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.24.49.jpeg)
+![Screenshot 12](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.25.04.jpeg)
+![Screenshot 13](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.25.26.jpeg)
+![Screenshot 14](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.25.38.jpeg)
+![Screenshot 15](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.25.48.jpeg)
+![Screenshot 16](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.26.06.jpeg)
+
+## Key Notes
+
+- External data providers are used where available (SoilGrids, Open-Meteo, OSM).
+- API responses are cached server-side for better performance.
+- System supports demo/hackathon mode with robust fallbacks in both backend and frontend.
+- Valuation is indicative intelligence only and not a legal/government valuation.
