@@ -4,51 +4,71 @@ AI-powered land intelligence platform with a React Native mobile client and Fast
 
 ## Screenshots
 
-Save all screenshots in `docs/screenshots/` using the filenames below. The README gallery will render automatically on GitHub.
+All uploaded app screenshots are embedded below.
 
-### Mobile App
+1. Screenshot 01
 
-1. Dashboard (zone distribution + valuation + quick action)
+![Screenshot 01](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.06.jpeg)
 
-![Dashboard - Zone Distribution and Valuation](docs/screenshots/01-dashboard-zone-valuation.png)
+2. Screenshot 02
 
-2. Console log snapshot (role and permissions flow)
+![Screenshot 02](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.08.jpeg)
 
-![Console Logs - Role and Permission Flow](docs/screenshots/02-console-logs-role-permissions.png)
+3. Screenshot 03
 
-3. Dashboard (health score + key metrics)
+![Screenshot 03](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.10.jpeg)
 
-![Dashboard - Health Score and Key Metrics](docs/screenshots/03-dashboard-health-metrics.png)
+4. Screenshot 04
 
-4. Settings (language selection modal)
+![Screenshot 04](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.11%20(1).jpeg)
 
-![Settings - Language Selector](docs/screenshots/04-settings-language-modal.png)
+5. Screenshot 05
 
-5. Map screen (prediction panel + measurement card)
+![Screenshot 05](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.11.jpeg)
 
-![Map - Prediction Panel and Measurements](docs/screenshots/05-map-prediction-measurements.png)
+6. Screenshot 06
 
-6. Map screen variant (measurement card repositioned)
+![Screenshot 06](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.13.jpeg)
 
-![Map - Measurement Card Variant](docs/screenshots/06-map-measurement-variant.png)
+7. Screenshot 07
 
-7. Map screen variant (compact measurements)
+![Screenshot 07](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.14.jpeg)
 
-![Map - Compact Measurements Variant](docs/screenshots/07-map-compact-measurements.png)
+8. Screenshot 08
 
-8. Map screen clean view (without measurement card)
+![Screenshot 08](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.22%20(1).jpeg)
 
-![Map - Clean View](docs/screenshots/08-map-clean-view.png)
+9. Screenshot 09
 
-### Desktop / Model View
+![Screenshot 09](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.23.22.jpeg)
 
-9. Terrain clustering model + cluster preview
+10. Screenshot 10
 
-![Desktop - Terrain Clustering and Cluster Map Preview](docs/screenshots/09-desktop-clustering-preview.png)
+![Screenshot 10](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.24.47.jpeg)
 
-10. Land health and valuation panel (dark UI)
+11. Screenshot 11
 
-![Desktop - Land Health and Valuation Panel](docs/screenshots/10-desktop-health-valuation-panel.png)
+![Screenshot 11](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.24.49.jpeg)
+
+12. Screenshot 12
+
+![Screenshot 12](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.25.04.jpeg)
+
+13. Screenshot 13
+
+![Screenshot 13](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.25.26.jpeg)
+
+14. Screenshot 14
+
+![Screenshot 14](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.25.38.jpeg)
+
+15. Screenshot 15
+
+![Screenshot 15](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.25.48.jpeg)
+
+16. Screenshot 16
+
+![Screenshot 16](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.26.06.jpeg)
 
 ## Project Structure
 
