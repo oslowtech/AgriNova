@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "Landroid",
+    "slug": "landroid",
+    "scheme": "landroid",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "plugins": [],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.agrinova.landroid"
+    },
+    "android": {
+      "package": "com.agrinova.landroid",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ]
+    },
+    "updates": {
+      "enabled": false
+    },
+    "extra": {
+      "eas": {
+        "projectId": "your-eas-project-id"
+      }
+    }
+  }
+}

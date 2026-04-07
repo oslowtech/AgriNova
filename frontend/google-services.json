@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "641692789228",
+    "project_id": "landhealth-21750",
+    "storage_bucket": "landhealth-21750.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:641692789228:android:ebfa903efd6da7880ef8c9",
+        "android_client_info": {
+          "package_name": "com.agrinova.landroid"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "641692789228-n9o9drv5pt7rgnpn2734qcs9980uu38h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgqVH3bvFTSUhm-a-1RNYj1sbkdiob-2Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "641692789228-n9o9drv5pt7rgnpn2734qcs9980uu38h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

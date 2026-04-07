@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Node
+node_modules/
+.expo/
+
+# Env files
+.env
+frontend/.env
+backend/.env
+frontend/ google-services.json
+backend/ google-services.json
+frontend/package.json
+frontend/package-lock.jso
+# OS
+.DS_Store
+Thumbs.db
+ProblemStatementAndData

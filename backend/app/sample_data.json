@@ -1,0 +1,15 @@
+{
+  "locations": [
+    {
+      "name": "Kallapuram Demo Plot",
+      "lat": 12.9716,
+      "lng": 77.5946,
+      "expected": {
+        "ndvi": "40-85",
+        "rainfall": "35-95",
+        "soil": "45-90",
+        "temperature": "35-95"
+      }
+    }
+  ]
+}
