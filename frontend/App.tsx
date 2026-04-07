@@ -40,6 +40,8 @@ export default function App() {
   }, []);
 
   function handleNeedsOnboarding(user: Partial<UserProfile>, token: string) {
+    console.log("handleNeedsOnboarding called with user:", user);
+    console.log("User UID:", user.uid);
     setPendingUser(user);
     setPendingToken(token);
     setAuthState("onboarding");

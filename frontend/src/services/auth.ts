@@ -210,18 +210,24 @@ export async function signInWithGoogleToken(idToken: string): Promise<{ user: Us
 }
 
 export async function completeOnboarding(
-  name: string,
-  role: UserRole,
-  pendingToken: string,
-  pendingUser: Partial<UserProfile>
+  userData: {
+    uid: string;
+    name: string;
+    role: UserRole;
+    phone?: string;
+    email?: string;
+    location?: { latitude: number; longitude: number; address: string };
+    createdAt: Date;
+  },
+  pendingToken: string
 ): Promise<UserProfile> {
   const user: UserProfile = {
-    uid: pendingUser.uid || `user_${Date.now()}`,
-    phone: pendingUser.phone,
-    email: pendingUser.email,
-    name,
-    role,
-    createdAt: new Date()
+    uid: userData.uid,
+    phone: userData.phone,
+    email: userData.email,
+    name: userData.name,
+    role: userData.role,
+    createdAt: userData.createdAt
   };
 
   // Save to Firestore (silent fail for demo mode)
@@ -233,6 +239,7 @@ export async function completeOnboarding(
         role: user.role,
         phone: user.phone || null,
         email: user.email || null,
+        location: userData.location || null,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });

@@ -14,7 +14,7 @@ backend/.env
 frontend/ google-services.json
 backend/ google-services.json
 frontend/package.json
-frontend/package-lock.jso
+frontend/package-lock.json
 # OS
 .DS_Store
 Thumbs.db

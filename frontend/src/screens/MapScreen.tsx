@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import MapView, { Marker, Polygon, MapPressEvent } from "react-native-maps";
+import MapView, { Marker, Polygon, Polyline, Circle, MapPressEvent } from "react-native-maps";
 import * as SecureStore from "expo-secure-store";
 import { fetchBoundary, fetchZoneMap, fetchLandHealth, fetchValuation } from "../api/client";
 import { palette, radius, shadows, spacing, typography } from "../theme";
@@ -82,6 +82,17 @@ export function MapScreen() {
   const [loading, setLoading] = useState(true);
   const [showPrediction, setShowPrediction] = useState(false);
 
+  // Measurement tool states
+  const [measurementMode, setMeasurementMode] = useState<'point' | 'line' | 'area' | null>(null);
+  const [measurementPoints, setMeasurementPoints] = useState<LatLng[]>([]);
+  const [measurements, setMeasurements] = useState<Array<{
+    id: string;
+    type: 'point' | 'line' | 'area';
+    points: LatLng[];
+    value: string;
+    color: string;
+  }>>([]);
+
   // Load saved boundary on mount
   useEffect(() => {
     async function loadSavedBoundary() {
@@ -154,9 +165,12 @@ export function MapScreen() {
   }, [zoneMap, activeBoundary]);
 
   const handleMapPress = (event: MapPressEvent) => {
-    if (!isDrawing) return;
-    const { coordinate } = event.nativeEvent;
-    setDrawingPoints(prev => [...prev, coordinate]);
+    if (isDrawing) {
+      const { coordinate } = event.nativeEvent;
+      setDrawingPoints(prev => [...prev, coordinate]);
+    } else if (measurementMode) {
+      handleMeasurementPress(event);
+    }
   };
 
   const startDrawing = () => {
@@ -217,6 +231,109 @@ export function MapScreen() {
 
   const undoLastPoint = () => {
     setDrawingPoints(prev => prev.slice(0, -1));
+  };
+
+  // Measurement tool functions
+  const haversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371000; // Earth's radius in meters
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+
+  const calculatePolygonArea = (points: LatLng[]): number => {
+    if (points.length < 3) return 0;
+    let area = 0;
+    for (let i = 0; i < points.length; i++) {
+      const j = (i + 1) % points.length;
+      area += points[i].longitude * points[j].latitude;
+      area -= points[j].longitude * points[i].latitude;
+    }
+    return Math.abs(area) / 2 * 111319.9 * 111319.9 * Math.cos(points[0].latitude * Math.PI / 180);
+  };
+
+  const handleMeasurementPress = (event: MapPressEvent) => {
+    if (!measurementMode) return;
+    
+    const { coordinate } = event.nativeEvent;
+    
+    if (measurementMode === 'point') {
+      // Add single point measurement
+      const newMeasurement = {
+        id: Date.now().toString(),
+        type: 'point' as const,
+        points: [coordinate],
+        value: `${coordinate.latitude.toFixed(6)}, ${coordinate.longitude.toFixed(6)}`,
+        color: '#FF6B6B'
+      };
+      setMeasurements(prev => [...prev, newMeasurement]);
+      setMeasurementMode(null);
+    } else {
+      // For line and area, collect multiple points
+      setMeasurementPoints(prev => {
+        const newPoints = [...prev, coordinate];
+        
+        if (measurementMode === 'line' && newPoints.length === 2) {
+          // Complete line measurement
+          const distance = haversineDistance(
+            newPoints[0].latitude, newPoints[0].longitude,
+            newPoints[1].latitude, newPoints[1].longitude
+          );
+          const newMeasurement = {
+            id: Date.now().toString(),
+            type: 'line' as const,
+            points: newPoints,
+            value: `${distance.toFixed(1)} m`,
+            color: '#4ECDC4'
+          };
+          setMeasurements(prev => [...prev, newMeasurement]);
+          setMeasurementPoints([]);
+          setMeasurementMode(null);
+        } else if (measurementMode === 'area' && newPoints.length >= 3) {
+          // Allow continuing to add points for area
+          return newPoints;
+        }
+        
+        return newPoints;
+      });
+    }
+  };
+
+  const finishAreaMeasurement = () => {
+    if (measurementMode === 'area' && measurementPoints.length >= 3) {
+      const area = calculatePolygonArea(measurementPoints);
+      const newMeasurement = {
+        id: Date.now().toString(),
+        type: 'area' as const,
+        points: [...measurementPoints],
+        value: area > 10000 ? `${(area / 10000).toFixed(2)} ha` : `${area.toFixed(0)} m²`,
+        color: '#45B7D1'
+      };
+      setMeasurements(prev => [...prev, newMeasurement]);
+      setMeasurementPoints([]);
+      setMeasurementMode(null);
+    }
+  };
+
+  const clearAllMeasurements = () => {
+    setMeasurements([]);
+    setMeasurementPoints([]);
+    setMeasurementMode(null);
+  };
+
+  const startMeasurement = (mode: 'point' | 'line' | 'area') => {
+    setMeasurementMode(mode);
+    setMeasurementPoints([]);
+    const instructions = {
+      point: "Tap anywhere to get coordinates",
+      line: "Tap two points to measure distance",
+      area: "Tap multiple points to create area (min 3 points)"
+    };
+    Alert.alert("Measurement Tool", instructions[mode], [{ text: "OK" }]);
   };
 
   if (loading) {
@@ -287,6 +404,88 @@ export function MapScreen() {
             strokeWidth={2}
           />
         )}
+
+        {/* Measurement points and lines */}
+        {measurementPoints.map((point, idx) => (
+          <Marker
+            key={`measure-point-${idx}`}
+            coordinate={point}
+            anchor={{ x: 0.5, y: 0.5 }}
+          >
+            <View style={[styles.measurePoint, { backgroundColor: measurementMode === 'point' ? '#FF6B6B' : measurementMode === 'line' ? '#4ECDC4' : '#45B7D1' }]}>
+              <Text style={styles.measurePointText}>{idx + 1}</Text>
+            </View>
+          </Marker>
+        ))}
+
+        {/* Measurement area preview */}
+        {measurementMode === 'area' && measurementPoints.length >= 2 && (
+          <Polygon
+            coordinates={measurementPoints}
+            fillColor="#45B7D144"
+            strokeColor="#45B7D1"
+            strokeWidth={2}
+          />
+        )}
+
+        {/* Measurement line preview */}
+        {measurementMode === 'line' && measurementPoints.length === 1 && (
+          <Circle
+            center={measurementPoints[0]}
+            radius={5}
+            fillColor="#4ECDC444"
+            strokeColor="#4ECDC4"
+            strokeWidth={2}
+          />
+        )}
+
+        {/* Completed measurements */}
+        {measurements.map((measurement) => (
+          <React.Fragment key={measurement.id}>
+            {measurement.type === 'point' && (
+              <Marker coordinate={measurement.points[0]}>
+                <View style={[styles.completedMeasurement, { backgroundColor: measurement.color }]}>
+                  <Text style={styles.completedMeasurementText}>📍</Text>
+                </View>
+              </Marker>
+            )}
+            
+            {measurement.type === 'line' && (
+              <>
+                <Polyline
+                  coordinates={measurement.points}
+                  strokeColor={measurement.color}
+                  strokeWidth={3}
+                />
+                {measurement.points.map((point, idx) => (
+                  <Marker key={`line-marker-${measurement.id}-${idx}`} coordinate={point}>
+                    <View style={[styles.completedMeasurement, { backgroundColor: measurement.color }]}>
+                      <Text style={styles.completedMeasurementText}>{idx + 1}</Text>
+                    </View>
+                  </Marker>
+                ))}
+              </>
+            )}
+            
+            {measurement.type === 'area' && (
+              <>
+                <Polygon
+                  coordinates={measurement.points}
+                  fillColor={measurement.color + "44"}
+                  strokeColor={measurement.color}
+                  strokeWidth={2}
+                />
+                {measurement.points.map((point, idx) => (
+                  <Marker key={`area-marker-${measurement.id}-${idx}`} coordinate={point}>
+                    <View style={[styles.completedMeasurement, { backgroundColor: measurement.color }]}>
+                      <Text style={styles.completedMeasurementText}>{idx + 1}</Text>
+                    </View>
+                  </Marker>
+                ))}
+              </>
+            )}
+          </React.Fragment>
+        ))}
       </MapView>
 
       {/* Top card */}
@@ -322,6 +521,20 @@ export function MapScreen() {
               <Text style={styles.predictionLabel}>Est. Value</Text>
             </View>
           </View>
+          
+          {/* Top Value Factors */}
+          {valuation.top_factors && valuation.top_factors.length > 0 && (
+            <View style={styles.topFactors}>
+              <Text style={styles.topFactorsTitle}>💡 Top Value Drivers</Text>
+              {valuation.top_factors.slice(0, 3).map((factor, idx) => (
+                <View key={idx} style={styles.factorRow}>
+                  <Text style={styles.factorName}>{factor.name}</Text>
+                  <Text style={styles.factorValue}>{factor.contribution}%</Text>
+                </View>
+              ))}
+            </View>
+          )}
+          
           <View style={styles.predictionMetrics}>
             <Text style={styles.metricText}>NDVI: {landHealth.ndvi.toFixed(2)}</Text>
             <Text style={styles.metricText}>Rainfall: {landHealth.rainfall}mm</Text>
@@ -370,9 +583,46 @@ export function MapScreen() {
         </View>
       )}
 
+      {/* Measurement controls */}
+      {measurementMode && (
+        <View style={[styles.measurementControls, { top: insets.top + 90 }]}>
+          {measurementMode === 'area' && measurementPoints.length >= 3 && (
+            <Pressable style={[styles.drawBtn, styles.drawBtnPrimary]} onPress={finishAreaMeasurement}>
+              <Text style={[styles.drawBtnText, styles.drawBtnTextPrimary]}>✓ Finish Area</Text>
+            </Pressable>
+          )}
+          <Pressable style={[styles.drawBtn, styles.drawBtnDanger]} onPress={() => setMeasurementMode(null)}>
+            <Text style={[styles.drawBtnText, styles.drawBtnTextDanger]}>✕ Cancel</Text>
+          </Pressable>
+        </View>
+      )}
+
+      {/* Measurement results */}
+      {measurements.length > 0 && !isDrawing && !measurementMode && (
+        <View style={[styles.measurementResults, { bottom: 180 + insets.bottom }]}>
+          <View style={styles.measurementHeader}>
+            <Text style={styles.measurementTitle}>📐 Measurements</Text>
+            <Pressable onPress={clearAllMeasurements}>
+              <Text style={styles.clearMeasurementsText}>Clear All</Text>
+            </Pressable>
+          </View>
+          {measurements.slice(-3).map((measurement) => (
+            <View key={measurement.id} style={styles.measurementResult}>
+              <View style={[styles.measurementDot, { backgroundColor: measurement.color }]} />
+              <Text style={styles.measurementText}>
+                {measurement.type === 'point' ? '📍' : measurement.type === 'line' ? '📏' : '🗺️'} {measurement.value}
+              </Text>
+            </View>
+          ))}
+          {measurements.length > 3 && (
+            <Text style={styles.measurementMore}>+{measurements.length - 3} more</Text>
+          )}
+        </View>
+      )}
+
       {/* Bottom controls */}
       <View style={[styles.controls, { bottom: 100 + insets.bottom }]}>
-        {!isDrawing ? (
+        {!isDrawing && !measurementMode ? (
           <>
             <Pressable 
               style={[styles.controlBtn, showPrediction && styles.controlBtnActive]} 
@@ -390,6 +640,27 @@ export function MapScreen() {
               <Text style={styles.controlIcon}>✏️</Text>
               <Text style={styles.controlText}>Draw</Text>
             </Pressable>
+            <Pressable 
+              style={styles.controlBtn} 
+              onPress={() => startMeasurement('point')}
+            >
+              <Text style={styles.controlIcon}>📍</Text>
+              <Text style={styles.controlText}>Point</Text>
+            </Pressable>
+            <Pressable 
+              style={styles.controlBtn} 
+              onPress={() => startMeasurement('line')}
+            >
+              <Text style={styles.controlIcon}>📏</Text>
+              <Text style={styles.controlText}>Distance</Text>
+            </Pressable>
+            <Pressable 
+              style={styles.controlBtn} 
+              onPress={() => startMeasurement('area')}
+            >
+              <Text style={styles.controlIcon}>🗺️</Text>
+              <Text style={styles.controlText}>Area</Text>
+            </Pressable>
             {userBoundary.length > 0 && (
               <Pressable 
                 style={styles.controlBtn} 
@@ -400,6 +671,14 @@ export function MapScreen() {
               </Pressable>
             )}
           </>
+        ) : measurementMode ? (
+          <View style={styles.drawingHint}>
+            <Text style={styles.drawingHintText}>
+              {measurementMode === 'point' ? '📍 Tap to get coordinates' : 
+               measurementMode === 'line' ? '📏 Tap two points to measure distance' :
+               '🗺️ Tap points to create area (min 3)'}
+            </Text>
+          </View>
         ) : (
           <View style={styles.drawingHint}>
             <Text style={styles.drawingHintText}>
@@ -627,5 +906,118 @@ const styles = StyleSheet.create({
   metricText: {
     ...typography.small,
     color: palette.muted
+  },
+  topFactors: {
+    marginTop: spacing.sm,
+    paddingTop: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: palette.border
+  },
+  topFactorsTitle: {
+    ...typography.small,
+    color: palette.ink,
+    fontWeight: "bold",
+    marginBottom: spacing.xs,
+    textAlign: "center"
+  },
+  factorRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 2
+  },
+  factorName: {
+    ...typography.small,
+    color: palette.muted,
+    flex: 1
+  },
+  factorValue: {
+    ...typography.small,
+    color: palette.primary,
+    fontWeight: "bold"
+  },
+  measurePoint: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#fff"
+  },
+  measurePointText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "bold"
+  },
+  completedMeasurement: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#fff"
+  },
+  completedMeasurementText: {
+    color: "#fff",
+    fontSize: 8,
+    fontWeight: "bold"
+  },
+  measurementControls: {
+    position: "absolute",
+    left: spacing.md,
+    right: spacing.md,
+    flexDirection: "row",
+    gap: spacing.sm,
+    justifyContent: "center"
+  },
+  measurementResults: {
+    position: "absolute",
+    right: spacing.md,
+    backgroundColor: palette.cardBg,
+    borderRadius: radius.md,
+    padding: spacing.sm,
+    ...shadows.md,
+    maxWidth: 200
+  },
+  measurementHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: spacing.xs
+  },
+  measurementTitle: {
+    ...typography.small,
+    color: palette.ink,
+    fontWeight: "bold"
+  },
+  clearMeasurementsText: {
+    ...typography.small,
+    color: palette.danger,
+    fontSize: 10
+  },
+  measurementResult: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
+    marginBottom: 4
+  },
+  measurementDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4
+  },
+  measurementText: {
+    ...typography.small,
+    color: palette.muted,
+    flex: 1
+  },
+  measurementMore: {
+    ...typography.small,
+    color: palette.muted,
+    fontSize: 10,
+    textAlign: "center",
+    marginTop: 4
   }
 });

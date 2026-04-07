@@ -66,9 +66,15 @@ def normalize_temperature(temp_c: float) -> float:
 
 
 def classify_label(score: float) -> str:
-    if score >= 70:
+    """
+    Classify land health score per FR-23:
+    - Healthy: 75-100
+    - Moderate: 50-74
+    - At Risk: below 50
+    """
+    if score >= 75:
         return "Healthy"
-    if score >= 45:
+    if score >= 50:
         return "Moderate"
     return "At Risk"
 
@@ -218,18 +224,39 @@ def compute_valuation(
     location_factor = 1.0 + (0.15 * (1.0 - min(abs(lat) / 60.0, 1.0)))
     base_price = 850.0
 
-    quality_index = (
-        0.5 * (health_score / 100.0)
-        + 0.3 * (soil_score / 100.0)
-        + 0.2 * (rainfall_score / 100.0)
-    )
+    # Calculate individual factor contributions
+    health_contribution = 0.5 * (health_score / 100.0)
+    soil_contribution = 0.3 * (soil_score / 100.0) 
+    rainfall_contribution = 0.2 * (rainfall_score / 100.0)
+    location_contribution = location_factor - 1.0  # How much location adds
+
+    quality_index = health_contribution + soil_contribution + rainfall_contribution
 
     mid = base_price * (0.6 + quality_index) * location_factor
     low = mid * 0.85
     high = mid * 1.2
 
+    # Calculate factor impact percentages for top 3 factors
+    factors = [
+        ("Land Health", health_contribution, health_score),
+        ("Soil Quality", soil_contribution, soil_score),
+        ("Rainfall", rainfall_contribution, rainfall_score),
+        ("Location", location_contribution * 0.5, location_factor * 50),  # Scale for display
+    ]
+    
+    # Sort by contribution and take top 3
+    top_factors = sorted(factors, key=lambda x: x[1], reverse=True)[:3]
+
     return {
         "low": round(low, 2),
         "mid": round(mid, 2),
         "high": round(high, 2),
+        "top_factors": [
+            {
+                "name": factor[0],
+                "contribution": round(factor[1] * 100, 1),  # As percentage
+                "score": round(factor[2], 1)
+            }
+            for factor in top_factors
+        ]
     }

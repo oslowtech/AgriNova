@@ -1,4 +1,4 @@
-import { LandHealth, Valuation, ZoneMap } from "../types";
+import { LandHealth, Valuation, ZoneMap, SoilData, WeatherData, ProximityData, LocationInfo, FullIntelligence } from "../types";
 
 const API_BASE = process.env.EXPO_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
@@ -40,11 +40,12 @@ const DEMO_VALUATION: Valuation = {
   high: 2100000,
   currency: "INR",
   confidence: 0.78,
-  factors: [
-    { name: "Land Health Score", impact: "positive" },
-    { name: "Proximity to Highway", impact: "positive" },
-    { name: "Water Body Nearby", impact: "positive" }
-  ]
+  top_factors: [
+    { name: "Land Health Score", impact: "positive", contribution: 30 },
+    { name: "Location Access", impact: "positive", contribution: 25 },
+    { name: "Soil Quality", impact: "neutral", contribution: 20 }
+  ],
+  disclaimer: "This is an estimated intelligence range, not a legal or government guideline valuation."
 };
 
 const DEMO_BOUNDARY = {
@@ -65,6 +66,51 @@ const DEMO_BOUNDARY = {
   }]
 };
 
+const DEMO_SOIL: SoilData = {
+  ph: 6.5,
+  organic_carbon: 15.2,
+  clay: 28.5,
+  sand: 35.2,
+  silt: 36.3,
+  texture_class: "Clay Loam",
+  confidence: 0.9,
+  source: "ISRIC SoilGrids"
+};
+
+const DEMO_WEATHER: WeatherData = {
+  temperature_mean: 27.5,
+  temperature_min: 18.2,
+  temperature_max: 38.5,
+  precipitation_annual: 1150,
+  precipitation_days: 85,
+  heat_stress_days: 45,
+  monthly_temps: [22, 24, 28, 32, 34, 30, 28, 27, 28, 27, 24, 22],
+  monthly_precip: [20, 15, 25, 45, 120, 180, 220, 190, 150, 100, 50, 30],
+  rainfall_status: "normal",
+  source: "Open-Meteo"
+};
+
+const DEMO_PROXIMITY: ProximityData = {
+  nearest_highway_km: 2.5,
+  nearest_town_km: 4.2,
+  nearest_water_km: 1.8,
+  highway_name: "NH-44",
+  town_name: "Kolar",
+  water_name: "Tank",
+  source: "OpenStreetMap"
+};
+
+const DEMO_LOCATION: LocationInfo = {
+  display_name: "Sample Village, Kolar, Karnataka, India",
+  village: "Sample Village",
+  town: null,
+  city: null,
+  district: "Kolar",
+  state: "Karnataka",
+  country: "India",
+  source: "OSM Nominatim"
+};
+
 let authToken: string | null = null;
 
 export function setAuthToken(token: string | null) {
@@ -77,7 +123,7 @@ export function getAuthToken(): string | null {
 
 async function request<T>(path: string, fallback?: T): Promise<T> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000);
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
 
   try {
     const headers: Record<string, string> = {
@@ -130,6 +176,26 @@ export async function fetchValuation(lat: number, lng: number): Promise<Valuatio
 
 export async function fetchBoundary(): Promise<any> {
   return request<any>("/boundary", DEMO_BOUNDARY);
+}
+
+export async function fetchSoilData(lat: number, lng: number): Promise<SoilData> {
+  return request<SoilData>(`/soil?lat=${lat}&lng=${lng}`, DEMO_SOIL);
+}
+
+export async function fetchWeatherData(lat: number, lng: number): Promise<WeatherData> {
+  return request<WeatherData>(`/weather?lat=${lat}&lng=${lng}`, DEMO_WEATHER);
+}
+
+export async function fetchProximityData(lat: number, lng: number): Promise<ProximityData> {
+  return request<ProximityData>(`/proximity?lat=${lat}&lng=${lng}`, DEMO_PROXIMITY);
+}
+
+export async function fetchLocationInfo(lat: number, lng: number): Promise<LocationInfo> {
+  return request<LocationInfo>(`/location?lat=${lat}&lng=${lng}`, DEMO_LOCATION);
+}
+
+export async function fetchFullIntelligence(lat: number, lng: number): Promise<FullIntelligence> {
+  return request<FullIntelligence>(`/intelligence?lat=${lat}&lng=${lng}`);
 }
 
 export async function checkHealth(): Promise<boolean> {
