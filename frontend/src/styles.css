@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-zinc-950 text-zinc-100 antialiased;
+  background: radial-gradient(circle at top left, #020617 0, #020617 35%, #0b1120 55%, #020617 100%);
+}
+

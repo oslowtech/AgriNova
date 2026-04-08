@@ -1,0 +1,38 @@
+[project]
+name = "landroid-backend"
+version = "0.1.0"
+description = "LANDROID land intelligence and valuation backend (FastAPI)"
+requires-python = ">=3.10"
+readme = "README.md"
+
+[project.dependencies]
+fastapi = "^0.115.0"
+uvicorn = {version = "^0.30.0", extras = ["standard"]}
+pydantic = "^2.8.2"
+pydantic-settings = "^2.5.2"
+SQLAlchemy = "^2.0.35"
+numpy = "^2.0.1"
+scikit-learn = "^1.5.2"
+pyproj = "^3.6.1"
+shapely = "^2.0.6"
+python-multipart = "^0.0.9"
+rasterio = "^1.4.1"
+opencv-python = "^4.10.0.84"
+scikit-image = "^0.24.0"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
+
+[tool.setuptools]
+package-dir = {"" = "app"}
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio", "httpx"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["app/tests"]
+

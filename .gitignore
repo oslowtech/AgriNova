@@ -20,3 +20,20 @@ Thumbs.db
 ProblemStatementAndData
 frontend/package.json
 frontend/package-lock.json
+
+
+
+# Python
+backend/.venv/
+__pycache__/
+
+# Uploads (VERY IMPORTANT)
+backend/app/uploads/
+
+# Large geospatial files
+*.tif
+
+# ML models
+*.pt
+*.pth
+*.h5
