@@ -93,59 +93,103 @@ npm run start
 ```
 
 ## ML Prediction Model (Working Integration)
+LANDROID — AI-Powered Land Intelligence Platform
 
-### Train model
+LANDROID is a full-stack geospatial AI platform that analyzes land using satellite data, environmental signals, and machine learning to generate actionable insights such as land health, vegetation zones, canopy detection, and valuation.
 
-```bash
-cd backend
-.venv\Scripts\activate
-python -m ml.train
-```
+Built for Birdscale × VIT Chennai Hackathon (2026).
 
-This creates `backend/ml/land_health_model.pkl`.
+🚀 Features
+📊 Land Health Dashboard
+NDVI trend analysis (current + historical)
+Rainfall adequacy (CHIRPS)
+Temperature trends & heat stress (ERA5)
+Soil quality (ISRIC SoilGrids)
+Composite Land Health Score (0–100)
+Health classification:
+🟢 Healthy (75–100)
+🟡 Moderate (50–74)
+🔴 At Risk (<50)
+🗺️ Plant Health Zone Mapping
+NDVI-based classification:
+Bare/Stressed (<0.2)
+Sparse (0.2–0.4)
+Healthy (0.4–0.6)
+Dense (>0.6)
+GIS overlay with legend
+Zone-wise area distribution
+Change detection across dates
+🌴 Tree & Canopy Detection
+OpenCV-based detection:
+Blob Detection
+Watershed Segmentation
+Outputs:
+Total tree count
+Density per acre
+Canopy map overlay
+Temporal comparison (missing/new trees)
+Stress detection (small canopy size)
+Confidence scoring
+💰 Land Valuation Engine
+AI-driven valuation (Rs/acre)
+Based on:
+Land Health Score (30%)
+Soil Quality (20%)
+Rainfall (15%)
+OSM Proximity (25%)
+Night Light Index (10%)
+Outputs:
+Low / Mid / High band
+Confidence score
+Top 3 driving factors
+⚠️ Clearly marked as non-government estimation
+🤖 Multi-Algorithm ML Comparison
 
-### How prediction works
+Compare performance across models:
 
-- `GET /ml/predict` and `POST /ml/predict` provide model inference.
-- `GET /ml/model/info` reports model readiness and feature importances.
-- The main health pipeline in `app/services/land_intelligence.py` uses trained ML model when available.
-- If model is missing or cannot load, backend automatically falls back to deterministic weighted formula, so predictions still continue.
+Random Forest
+XGBoost
+LightGBM
+CatBoost
+Neural Network (MLP)
+Linear Regression (baseline)
 
-## API Reference (Connected and Implemented)
+Metrics:
 
-All routes below are implemented in `backend/app/main.py` and `backend/ml/api.py`.
+RMSE, MAE, R² (regression)
+Accuracy, F1, AUC (classification)
+Runtime & latency
+Confidence calibration
+🏗️ Tech Stack
+Frontend
+React + TypeScript
+Tailwind CSS
+Recharts / Plotly
+Leaflet / Mapbox GL
+Backend
+FastAPI (Python)
+GeoPandas, Rasterio, Shapely
+OpenCV, scikit-image
+scikit-learn, XGBoost, LightGBM
+Data Sources
+Birdscale NDVI Raster
+Sentinel-2 (Planetary Computer)
+CHIRPS Rainfall
+ERA5 Temperature
+ISRIC SoilGrids
+VIIRS Night Lights
+OpenStreetMap
+🧠 System Architecture
+Data Sources → Data Pipeline → Feature Engineering → ML Models
+            → Scoring Engine → API Layer → Frontend Dashboard
 
-| Endpoint | Method | Purpose |
-|---|---|---|
-| `/health` | GET | API health check |
-| `/boundary` | GET | Returns parcel boundary GeoJSON |
-| `/land-health` | GET | Health score, label, confidence, metrics |
-| `/zone-map` | GET | Cell-wise NDVI zones + percentages |
-| `/valuation` | GET | Indicative valuation range + top factors |
-| `/soil` | GET | SoilGrids-based soil properties |
-| `/weather` | GET | Open-Meteo weather summary |
-| `/proximity` | GET | OSM proximity to highway/town/water |
-| `/location` | GET | Reverse geocoded location info |
-| `/intelligence` | GET | Combined one-call intelligence payload |
-| `/ml/predict` | GET/POST | ML health prediction |
-| `/ml/model/info` | GET | Model metadata/readiness |
+Modular design:
 
-## Quick API Verification
-
-Run after backend is started:
-
-```bash
-curl "http://localhost:8000/health"
-curl "http://localhost:8000/land-health?lat=12.961705&lng=77.599227"
-curl "http://localhost:8000/zone-map?lat=12.961705&lng=77.599227&grid_size=12"
-curl "http://localhost:8000/valuation?lat=12.961705&lng=77.599227"
-curl "http://localhost:8000/intelligence?lat=12.961705&lng=77.599227"
-curl "http://localhost:8000/ml/model/info"
-curl "http://localhost:8000/ml/predict?ndvi=0.62&rainfall=900&soil_ph=6.5&temperature=27"
-```
-
-If these return JSON responses, API connectivity and prediction flow are working correctly.
-
+Data acquisition layer
+Feature engineering
+ML + rule-based scoring
+Visualization layer
+Algorithm comparison engine
 ## Screenshots
 
 ### Mobile App and Console
