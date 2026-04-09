@@ -166,6 +166,15 @@ If these return JSON responses, API connectivity and prediction flow are working
 ![Screenshot 14](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.25.38.jpeg)
 ![Screenshot 15](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.25.48.jpeg)
 ![Screenshot 16](docs/screenshots/WhatsApp%20Image%202026-04-07%20at%2013.26.06.jpeg)
+<img width="1600" height="1136" alt="image" src="https://github.com/user-attachments/assets/ed80cca5-8561-43e5-9819-709bcfe2e0a0" />
+<img width="1600" height="1077" alt="image" src="https://github.com/user-attachments/assets/50091d23-d818-4849-a27b-20260b8fbb8e" />
+<img width="774" height="1068" alt="image" src="https://github.com/user-attachments/assets/1a6ee290-12e2-448f-b586-a0b49f151287" />
+<img width="1252" height="1002" alt="image" src="https://github.com/user-attachments/assets/f05af7fa-c57b-4fa5-b22b-6182788f4aa6" />
+<img width="1600" height="1180" alt="image" src="https://github.com/user-attachments/assets/f7fc057f-5660-483d-9673-d0102873dc2c" />
+
+
+
+
 
 ## Key Notes
 
